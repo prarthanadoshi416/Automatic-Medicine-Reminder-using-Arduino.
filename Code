@@ -1,0 +1,318 @@
+#include <Keypad.h>
+#include <LiquidCrystal.h>
+#include<string.h>
+
+LiquidCrystal lcd(5, 4, 3, 2, A4, A5);
+
+const byte ROWS = 4; //four rows
+const byte COLS = 4; //three columns
+char keys[ROWS][COLS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+byte rowPins[ROWS] = {A0, A1, 11, 10}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {9, 8, 7, 6}; //connect to the column pinouts of the keypad
+Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+int LCDRow1 = 0,LCDRow2=1,LCDCol1=0,LCDCol2=1;
+#define LED 13
+#define PIEZO 12
+char key;
+bool PRESS[4]={false,false,false,false};
+String MED1,MED2;
+int hr=0,min=0,sec=0,dy=11,mnth=04,yr=2021,time1[3],time2[3],flag[4];
+
+void setup(){
+   Serial.begin(9600);
+   lcd.begin(16, 2);
+   lcd.setCursor(0,LCDRow1);
+   pinMode(LED, OUTPUT);
+   
+   int g=0,e=0,h=0;
+   flag[2]=1;
+   flag[3]=0;
+   lcd.setCursor(0,0);
+   lcd.print("Welcome!");
+   delay(1000);
+   lcd.setCursor(0,0);
+  lcd.print("Enter Date");
+    lcd.setCursor(0,LCDRow2);
+    lcd.print("DY:");
+   LCDCol2=3;
+    G :
+    key=keypad.getKey();
+    if( key>='0' && key<='9' && key!='#' && key!='*' && LCDCol2<5 ){
+      lcd.setCursor(LCDCol2++,LCDRow2); 
+        lcd.print(key);
+        g=(g*10)+(key-'0');
+    }
+    if(key!='#') goto G;
+    Serial.println(g);
+    
+     lcd.setCursor(6,LCDRow2);
+     lcd.print("MN:");
+     LCDCol2=9;
+      E :
+      key=keypad.getKey();
+      if( key>='0' && key<='9' && LCDCol2<11 ){
+        lcd.setCursor(LCDCol2++,LCDRow2); 
+          lcd.print(key);
+          e=(e*10)+(key-'0');
+      }
+      if(key!='#') goto E;
+      Serial.println(e);
+      
+      lcd.setCursor(12,LCDRow2);
+      lcd.print("Yr");
+      LCDCol2=14;
+      H :
+      key=keypad.getKey();
+      if( key>='0' && key<='9' && key!='#' && key!='*' && LCDCol2<16 ){
+      lcd.setCursor(LCDCol2++,LCDRow2); 
+        lcd.print(key);
+        h=(h*10)+(key-'0');
+      }
+       if(key!='#') goto H;
+         Serial.println(h);
+  
+       int dy=g; 
+       int mnth=e; 
+       int yr=h;
+  
+       lcd.setCursor(0,0);
+       lcd.print("Project by:");
+       lcd.setCursor(0,1);
+       lcd.print("Prarthana Doshi.");
+  	   delay(1500); 
+  	   lcd.clear();   
+       lcd.setCursor(0,LCDRow1);
+       lcd.print("Set Time:");
+  	   
+}
+void initializeTime(int f){
+    int a=0,b=0,c=0;
+
+    lcd.setCursor(0,LCDRow2);
+    lcd.print("HH:");
+   LCDCol2=3;
+  	A :
+    key=keypad.getKey();
+    if( key>='0' && key<='9' && key!='#' && key!='*' && LCDCol2<5 ){
+    	lcd.setCursor(LCDCol2++,LCDRow2);	
+      	lcd.print(key);
+      	a=(a*10)+(key-'0');
+    }
+    if(key!='#') goto A;
+    Serial.println(a);
+    
+     lcd.setCursor(6,LCDRow2);
+     lcd.print("MM:");
+     LCDCol2=9;
+      B :
+     	key=keypad.getKey();
+    	if( key>='0' && key<='9' && LCDCol2<11 ){
+    		lcd.setCursor(LCDCol2++,LCDRow2);	
+      		lcd.print(key);
+      		b=(b*10)+(key-'0');
+    	}
+    	if(key!='#') goto B;
+    	Serial.println(b);
+      
+      lcd.setCursor(12,LCDRow2);
+      lcd.print("SS");
+      LCDCol2=14;
+  	  C :
+      key=keypad.getKey();
+      if( key>='0' && key<='9' && key!='#' && key!='*' && LCDCol2<16 ){
+    	lcd.setCursor(LCDCol2++,LCDRow2);	
+      	lcd.print(key);
+      	c=(c*10)+(key-'0');
+      }
+       if(key!='#') goto C;
+         Serial.println(c);
+  lcd.clear();
+  
+  if(f==0){ hr=a; min=b; sec=c; }
+  else if(f==1){ time1[0]=a; time1[1]=b; time1[2]=c; }
+  else if(f==2){ time2[0]=a; time2[1]=b; time2[2]=c; }
+  lcd.clear();
+}
+void initializeMED1(){
+  	flag[0]=1;
+	lcd.clear();
+    lcd.setCursor(0,0);
+  	lcd.print("Enter Med 1 :");
+    LCDCol1=13;
+    X :
+    key=keypad.getKey();
+    if( key>='A' && key<='D' ){
+    	lcd.setCursor(LCDCol1++,LCDRow1);	
+      	lcd.print(key);
+      	MED1+=key;
+    }
+    if(key!='#') goto X;
+    Serial.println(MED1);
+    lcd.setCursor(0,LCDRow2);
+  	initializeTime(1);
+}
+void initializeMED2(){
+  	flag[1]=1;
+	lcd.clear();
+    lcd.setCursor(0,0);
+  	lcd.print("Enter Med 2 :");
+    LCDCol1=13;
+    Y :
+    key=keypad.getKey();
+    if( key>='A' && key<='D' ){
+    	lcd.setCursor(LCDCol1++,LCDRow1);	
+      	lcd.print(key);
+      	MED2+=key;
+    }
+    if(key!='#') goto Y;
+    Serial.println(MED2);
+    lcd.setCursor(0,LCDRow2);
+  	initializeTime(2);
+}
+void loop(){
+  
+  if(flag[3]==1)	
+    	PRESS[3]=false;
+
+  if(key=keypad.getKey()=='*' && flag[2]==1){
+    flag[2]=0;
+    PRESS[0]=true;
+  }
+  
+  if(PRESS[0]){ 
+    initializeTime(0);
+    PRESS[0]=false;
+    PRESS[1]=true;
+  }
+  
+  else if(PRESS[1]){
+    initializeMED1();
+    PRESS[1]=false;
+    PRESS[2]=true;
+  }
+  
+  else if(PRESS[2]){
+    initializeMED2();
+    PRESS[2]=false;
+    PRESS[3]=true;
+  }
+  else if(PRESS[3]){
+  
+    lcd.setCursor(6, 0); lcd.print(":");
+    lcd.setCursor(9, 0); lcd.print(":");
+//    Serial.print(min); Serial.print(":");
+//    Serial.println(sec);
+    	if(sec==60){
+          	sec=0;
+      		min++;
+        }
+
+    	if (hr <= 9) {
+      		lcd.setCursor(4, 0); lcd.print("0");
+      		lcd.setCursor(5, 0); lcd.print(hr);
+    	}
+    	else if (hr > 9) {
+      		lcd.setCursor(4, 0); lcd.print(hr);
+    	}
+    	if (min <= 9) {
+      		lcd.setCursor(7, 0); lcd.print("0");
+      		lcd.setCursor(8, 0); lcd.print(min);
+    	}
+    	else if (min > 9) {
+      		lcd.setCursor(7, 0); lcd.print(min);
+    	}
+    	if (sec <= 9) {
+      		lcd.setCursor(10, 0); lcd.print("0");
+      		lcd.setCursor(11, 0); lcd.print(sec);
+    	}
+    	else if (sec > 9) {
+      		lcd.setCursor(10, 0); lcd.print(sec);
+    	}
+
+		lcd.setCursor(5, 1); lcd.print("/");
+		lcd.setCursor(8, 1); lcd.print("/");
+
+		if (dy <= 9) {
+      		lcd.setCursor(3, 1); lcd.print("0");
+      		lcd.setCursor(4, 1); lcd.print(dy);
+    	}
+    	else if (dy > 9) {
+      		lcd.setCursor(3, 1); lcd.print(dy);
+    	}
+		if (mnth <= 9) {
+      		lcd.setCursor(6, 1); lcd.print("0");
+      		lcd.setCursor(7, 1); lcd.print(mnth);
+    	}
+    	else if (mnth > 9) {
+      		lcd.setCursor(6, 1); lcd.print(mnth);
+    	}
+      	lcd.setCursor(9, 1); lcd.print(yr);
+    delay(1000);	sec++;
+   lcd.clear();
+    
+    if (sec == 60) {
+    min++;
+    sec = 0 ;
+  }
+  
+  if (min == 60) {
+    hr++;
+    min = 0 ;
+  }
+
+  if (hr == 24) {
+    hr = 0;
+    dy++;
+  }
+
+  if (dy == 30) {
+    mnth++;
+    dy = 0;
+  }
+
+  if (mnth == 12) {
+    yr++;
+    mnth = 0;
+  }
+    
+    sec++;
+    
+  
+  if(time1[0]==hr && time1[1]==min && time1[2]==sec){
+  	digitalWrite(LED,HIGH);
+    tone(PIEZO,500,500);	flag[3]=1;
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Time to take ");
+    lcd.print(MED1);
+    lcd.setCursor(0,1);
+    lcd.print(time1[0]); lcd.print(":");
+    lcd.print(time1[1]); lcd.print(":");
+    lcd.print(time1[2]);
+    delay(2000);
+    lcd.clear();
+    flag[3]=0;
+    
+  }
+  else if(time2[0]==hr && time2[1]==min && time2[2]==sec){
+    digitalWrite(LED,HIGH);
+    tone(PIEZO,500,500);	flag[3]=1;
+    lcd.clear();
+    lcd.print("Time to take ");
+    lcd.print(MED2); 
+    lcd.setCursor(0,1);
+    lcd.print(time2[0]); lcd.print(":");
+    lcd.print(time2[1]); lcd.print(":");
+    lcd.print(time2[2]);
+    delay(2000);
+    lcd.clear();
+    flag[3]=0;
+   }
+
+  }	//Main else END
+}
